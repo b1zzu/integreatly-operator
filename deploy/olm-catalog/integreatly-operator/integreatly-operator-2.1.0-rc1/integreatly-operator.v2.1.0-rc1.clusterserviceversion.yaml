@@ -1,0 +1,369 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: |-
+      [
+        {
+          "apiVersion": "integreatly.org/v1alpha1",
+          "kind": "RHMI",
+          "metadata": {
+            "name": "INSTALLATION_NAME"
+          },
+          "spec": {
+            "deadMansSnitchSecret": "INSTALLATION_PREFIX-deadmanssnitch",
+            "namespacePrefix": "INSTALLATION_PREFIX-",
+            "operatorsInProductNamespace": "OPERATORS_IN_PRODUCT_NAMESPACE",
+            "pagerDutySecret": "INSTALLATION_PREFIX-pagerduty",
+            "pullSecret": {
+              "name": "DELOREAN_PULL_SECRET_NAME",
+              "namespace": "DELOREAN_PULL_SECRET_NAMESPACE"
+            },
+            "selfSignedCerts": "SELF_SIGNED_CERTS",
+            "smtpSecret": "INSTALLATION_PREFIX-smtp",
+            "type": "INSTALLATION_TYPE",
+            "useClusterStorage": "USE_CLUSTER_STORAGE"
+          }
+        },
+        {
+          "apiVersion": "integreatly.org/v1alpha1",
+          "kind": "RHMI",
+          "metadata": {
+            "name": "example-rhmi"
+          },
+          "spec": {
+            "deadMansSnitchSecret": "redhat-rhmi-deadmanssnitch",
+            "namespacePrefix": "redhat-rhmi-",
+            "pagerDutySecret": "redhat-rhmi-pagerduty",
+            "selfSignedCerts": true,
+            "smtpSecret": "redhat-rhmi-smtp",
+            "type": "managed",
+            "useClusterStorage": "true"
+          }
+        }
+      ]
+    capabilities: Basic Install
+  name: integreatly-operator.v2.1.0-rc1
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - description: RHMI is the Schema for the RHMI API
+      kind: RHMI
+      name: rhmis.integreatly.org
+      version: v1alpha1
+  description: Placeholder description
+  displayName: Integreatly Operator
+  install:
+    spec:
+      clusterPermissions:
+      - rules:
+        - apiGroups:
+          - integreatly.org
+          - applicationmonitoring.integreatly.org
+          resources:
+          - '*'
+          verbs:
+          - '*'
+        - apiGroups:
+          - console.openshift.io
+          resources:
+          - consolelinks
+          verbs:
+          - get
+          - create
+          - update
+          - delete
+        - apiGroups:
+          - ""
+          - project.openshift.io
+          resources:
+          - projectrequests
+          verbs:
+          - create
+        - apiGroups:
+          - ""
+          resources:
+          - namespaces
+          verbs:
+          - list
+          - get
+          - watch
+        - apiGroups:
+          - apps
+          resources:
+          - deployments
+          verbs:
+          - list
+          - get
+          - watch
+        - apiGroups:
+          - apps.openshift.io
+          resources:
+          - deploymentconfigs
+          verbs:
+          - list
+          - get
+          - watch
+        - apiGroups:
+          - route.openshift.io
+          resourceNames:
+          - console
+          resources:
+          - routes
+          verbs:
+          - get
+        - apiGroups:
+          - template.openshift.io
+          resources:
+          - templates
+          verbs:
+          - get
+          - create
+          - update
+          - delete
+        - apiGroups:
+          - image.openshift.io
+          resources:
+          - imagestreams
+          verbs:
+          - get
+          - create
+          - delete
+          - update
+        - apiGroups:
+          - ""
+          resourceNames:
+          - samples-registry-credentials
+          resources:
+          - secrets
+          verbs:
+          - get
+        - apiGroups:
+          - ""
+          resourceNames:
+          - grafana-datasources
+          resources:
+          - secrets
+          verbs:
+          - get
+        - apiGroups:
+          - oauth.openshift.io
+          resources:
+          - oauthclients
+          verbs:
+          - create
+          - get
+          - update
+          - delete
+        - apiGroups:
+          - user.openshift.io
+          resources:
+          - groups
+          verbs:
+          - get
+          - list
+          - watch
+        - apiGroups:
+          - user.openshift.io
+          resources:
+          - groups
+          verbs:
+          - create
+        - apiGroups:
+          - user.openshift.io
+          resourceNames:
+          - rhmi-developers
+          resources:
+          - groups
+          verbs:
+          - update
+          - delete
+        - apiGroups:
+          - user.openshift.io
+          resources:
+          - users
+          verbs:
+          - watch
+          - get
+          - list
+        - apiGroups:
+          - samples.operator.openshift.io
+          resourceNames:
+          - cluster
+          resources:
+          - configs
+          verbs:
+          - get
+          - update
+        - apiGroups:
+          - ""
+          resources:
+          - namespaces
+          verbs:
+          - update
+        - apiGroups:
+          - operators.coreos.com
+          resources:
+          - catalogsources
+          - operatorgroups
+          verbs:
+          - create
+        - apiGroups:
+          - operators.coreos.com
+          resourceNames:
+          - rhmi-registry-cs
+          resources:
+          - catalogsources
+          verbs:
+          - update
+        - apiGroups:
+          - operators.coreos.com
+          resources:
+          - installplans
+          verbs:
+          - update
+        - apiGroups:
+          - monitoring.coreos.com
+          resources:
+          - prometheusrules
+          verbs:
+          - get
+          - list
+          - create
+          - update
+          - delete
+        - apiGroups:
+          - user.openshift.io
+          resources:
+          - identities
+          verbs:
+          - get
+        serviceAccountName: rhmi-operator
+      deployments:
+      - name: rhmi-operator
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              name: rhmi-operator
+          strategy: {}
+          template:
+            metadata:
+              labels:
+                name: rhmi-operator
+            spec:
+              containers:
+              - command:
+                - rhmi-operator
+                env:
+                - name: WATCH_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.annotations['olm.targetNamespaces']
+                - name: POD_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.name
+                - name: OPERATOR_NAME
+                  value: rhmi-operator
+                - name: USE_CLUSTER_STORAGE
+                  value: "true"
+                image: quay.io/integreatly/integreatly-operator:v2.1.0-rc1
+                imagePullPolicy: Always
+                name: rhmi-operator
+                resources: {}
+              serviceAccountName: rhmi-operator
+      permissions:
+      - rules:
+        - apiGroups:
+          - ""
+          resources:
+          - pods
+          - events
+          - configmaps
+          - secrets
+          verbs:
+          - list
+          - get
+          - watch
+          - create
+          - update
+          - patch
+        - apiGroups:
+          - ""
+          resources:
+          - configmaps
+          verbs:
+          - delete
+        - apiGroups:
+          - ""
+          resources:
+          - services
+          - services/finalizers
+          verbs:
+          - list
+          - get
+          - watch
+          - create
+          - update
+        - apiGroups:
+          - monitoring.coreos.com
+          resources:
+          - servicemonitors
+          verbs:
+          - get
+          - create
+        - apiGroups:
+          - apps
+          resources:
+          - deployments/finalizers
+          verbs:
+          - update
+        - apiGroups:
+          - operators.coreos.com
+          resources:
+          - subscriptions
+          verbs:
+          - get
+          - list
+          - watch
+          - update
+        - apiGroups:
+          - monitoring.coreos.com
+          resources:
+          - prometheusrules
+          verbs:
+          - get
+          - list
+          - create
+          - update
+          - delete
+        - apiGroups:
+          - rbac.authorization.k8s.io
+          resources:
+          - roles
+          - rolebindings
+          verbs:
+          - get
+          - list
+          - watch
+          - create
+          - update
+          - delete
+        serviceAccountName: rhmi-operator
+    strategy: deployment
+  installModes:
+  - supported: true
+    type: OwnNamespace
+  - supported: true
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  maturity: alpha
+  provider: {}
+  replaces: integreatly-operator.v0.0.0
+  version: 2.1.0-rc1
