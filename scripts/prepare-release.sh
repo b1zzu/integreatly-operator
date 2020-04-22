@@ -5,7 +5,7 @@ set -o pipefail
 PREVIOUS_VERSION="$(cat deploy/olm-catalog/integreatly-operator/integreatly-operator.package.yaml | grep integreatly-operator | awk -F v '{print $2}')"
 
 create_new_csv() {
-  operator-sdk generate csv --csv-version "$VERSION" --default-channel --csv-channel=rhmi --update-crds --from-version "$PREVIOUS_VERSION"
+  operator-sdk generate csv --csv-version "$VERSION" --default-channel --operator-name integreatly-operator --csv-channel=rhmi --update-crds --from-version "$PREVIOUS_VERSION"
 }
 
 set_csv() {
