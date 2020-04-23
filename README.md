@@ -231,9 +231,11 @@ Run `make ocm/install/rhmi-addon` to trigger the installation. Once the installa
 ## Release
 
 - Create `release-<release-number>` branch
-- Update `tag` and `previoustag` in makefile
-- Run `make gen/csv`
-- - Perform any manual tidying up of the generated CSV as required.
+- Run `scripts/prepare-release.sh -t <tag>` and/or `-v <version>`
+    - Passing a tag alone will update the csv and associated files ( getting the version to update from the  integreatly-operator.package.yaml ) with the new tag
+    - Passing a version alone will generate a new csv and update associated files
+    - Passing a tag and a version will generate a new csv and apply the specified tag to associated files
+    - Perform any manual tidying up of the generated CSV as required.
 - Run `make gen/namespaces` against a fully installed cluster. 
 - Make a PR against this repo
 - Get a review on PR and see e2e test pass

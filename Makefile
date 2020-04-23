@@ -275,19 +275,6 @@ else
 endif
 	@-oc create -f deploy/integreatly-rhmi-cr.yml
 
-.PHONY: gen/csv
-gen/csv:
-	@mv deploy/olm-catalog/integreatly-operator/integreatly-operator-$(PREVIOUS_TAG) deploy/olm-catalog/integreatly-operator/$(PREVIOUS_TAG)
-	@rm -rf deploy/olm-catalog/integreatly-operator/integreatly-operator-$(TAG)
-	@$(SED_INLINE) 's/image:.*/image: quay\.io\/integreatly\/integreatly-operator:v$(TAG)/g' deploy/operator.yaml
-	$(OPERATOR_SDK) generate csv --csv-version $(TAG) --default-channel --csv-channel=rhmi --update-crds --from-version $(PREVIOUS_TAG)
-	@echo Updating package file
-	@$(SED_INLINE) 's/$(PREVIOUS_TAG)/$(TAG)/g' version/version.go
-	@$(SED_INLINE) 's/$(PREVIOUS_TAG)/$(TAG)/g' deploy/olm-catalog/integreatly-operator/integreatly-operator.package.yaml
-	@mv deploy/olm-catalog/integreatly-operator/$(PREVIOUS_TAG) deploy/olm-catalog/integreatly-operator/integreatly-operator-$(PREVIOUS_TAG)
-	@mv deploy/olm-catalog/integreatly-operator/$(TAG) deploy/olm-catalog/integreatly-operator/integreatly-operator-$(TAG)
-	@$(SED_INLINE) 's/integreatly-operator:v$(PREVIOUS_TAG).*/integreatly-operator:v$(TAG)/g' deploy/olm-catalog/integreatly-operator/integreatly-operator-$(TAG)/integreatly-operator.v${TAG}.clusterserviceversion.yaml
-
 .PHONY: push/csv
 push/csv:
 	operator-courier verify deploy/olm-catalog/integreatly-operator
