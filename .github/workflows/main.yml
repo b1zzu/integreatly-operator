@@ -1,0 +1,35 @@
+name: Test Cases JSON
+
+on:
+  push:
+    paths:
+      - test-cases/**
+      - .github/workflows/**
+
+  workflow_dispatch:
+    inputs: {}
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Get dependencies
+        run: npm install
+
+      - name: Generate JSON
+        run: ./tools.sh export json --output test-cases.json
+        working-directory: test-cases/
+
+      - name: Upload the Test Cases JSON
+        uses: actions/upload-artifact@v2
+        with:
+          path: test-cases/test-cases.json
