@@ -31,19 +31,19 @@ function expandVariants(
         const template = handlebars.compile(test.content);
         for (const variant of test.data.variants) {
             // clone metadata
-            let data = clone(test.data);
+            const data = clone(test.data);
 
             // remove redundant variants
             delete data.variants;
 
             // merge data
-            data = merge(data, variant);
+            const mdata = merge(data, variant);
 
             // render content
-            const content = template(data.vars);
+            const content = template(mdata.vars);
 
             // remove vars
-            delete data.vars;
+            delete mdata.vars;
 
             result.push({
                 content,

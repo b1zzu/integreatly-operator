@@ -69,11 +69,44 @@ const csv: CommandModule<{}, CSVArgs> = {
     }
 };
 
+interface JSONArgs {
+    output: string;
+}
+
+// tslint:disable:object-literal-sort-keys
+const json: CommandModule<{}, JSONArgs> = {
+    command: "json",
+    describe: "export all test cases in a json file",
+    builder: {
+        output: {
+            describe: "the name of the file where to write the json object",
+            type: "string",
+            demand: true
+        }
+    },
+    handler: async args => {
+        let tests = flat(loadTestFiles().map(file => loadTestCases(file)));
+
+        const data = tests.map(t => ({
+            ID: t.id,
+            Category: t.category,
+            Title: t.title,
+            Tags: t.tags,
+            Estimate: t.estimate,
+            Require: t.require,
+            Link: t.file.link,
+            Runs: t.id
+        }));
+
+        fs.writeFileSync(args.output, JSON.stringify(data));
+    }
+};
+
 const expor: CommandModule = {
     command: "export",
     describe: "export the test cases in csv",
     builder: (args: Argv): Argv => {
-        return args.command(csv);
+        return args.command(csv).command(json);
     },
     handler: () => {
         // nothing
